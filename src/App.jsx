@@ -66,7 +66,6 @@ function App() {
     const generateSentence = async () => {
         if (!keywords.trim()) return;
         setLoading(true);
-
         const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". Tone: ${tone}. Language complexity: ${simplicity}.`;
 
         const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -76,7 +75,7 @@ function App() {
                 Authorization: `Bearer ${OPENAI_API_KEY}`,
             },
             body: JSON.stringify({
-                model: "gpt-4",
+                model: "gpt-4.1-nano",
                 messages: [{ role: "user", content: prompt }],
                 max_tokens: 60,
             }),
