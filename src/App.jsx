@@ -66,7 +66,8 @@ function App() {
     const generateSentence = async () => {
         if (!keywords.trim()) return;
         setLoading(true);
-        const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". Tone: ${tone}. Language complexity: ${simplicity}.`;
+        const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". Tone: ${tone}. Language complexity: ${simplicity}.
+        If the keywords contains only abbreviations or internet slang, just expand them.`;
 
         const res = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
@@ -93,7 +94,7 @@ function App() {
 
     return (
         <div className="App">
-            <h1>🎤 PromptBuddy</h1>
+            <h1>🤖💬 PromptBuddy</h1>
             <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
 
             <textarea
