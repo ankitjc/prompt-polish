@@ -93,7 +93,7 @@ function App() {
 
     return (
         <div className="App">
-            <h1>🎤 PromptPolish</h1>
+            <h1>🎤 PromptBuddy</h1>
             <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
 
             <textarea
