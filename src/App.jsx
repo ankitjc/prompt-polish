@@ -92,13 +92,24 @@ function App() {
     };
 
     useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
         setHasGenerated(false);
     }, [keywords]);
 
     const handleGoogleLogin = (credentialResponse) => {
         const decoded = jwtDecode(credentialResponse.credential);
         setUser(decoded);
+        localStorage.setItem("user", JSON.stringify(decoded));
         console.log("User Info:", decoded);
+    };
+
+    const handleLogout = () => {
+        setUser(null);
+        localStorage.removeItem("user");
+        console.log("User signed out.");
     };
 
     const handleGoogleLoginError = () => {
@@ -106,21 +117,31 @@ function App() {
     };
 
     return (
-        <div className="App">
+        <div >
 
             {!user ? (
-                <GoogleLogin
-                    onSuccess={handleGoogleLogin}
-                    onError={handleGoogleLoginError}
-                />
+                <div className="App">
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={handleGoogleLoginError}
+                    />
+                </div>
             ) : (
-                <div>
-                    <p>👋 Hello, {user.name}</p>
+                <div className="App">
+                    <header className="app-header">
+                        <div className="app-title">
+                            <h1>🤖💬 PromptBuddy</h1>
 
+                        </div>
 
-                    <h1>🤖💬 PromptBuddy</h1>
+                        {user && (
+                            <div className="user-info">
+                                <span>👋 Welcome, {user.name}</span>
+                                <button className="signout-button" onClick={handleLogout}>Sign out</button>
+                            </div>
+                        )}
+                    </header>
                     <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
-
                     <textarea
                         placeholder="e.g. tired, homework, late night"
                         value={keywords}

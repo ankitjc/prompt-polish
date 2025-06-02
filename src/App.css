@@ -175,3 +175,48 @@ button:disabled {
   font-style: italic;
   text-align: right;
 }
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.app-title h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.app-title p {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.9rem;
+}
+
+.signout-button {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 5px 10px;
+}
+
+.signout-button:hover {
+  color: #FFF;
+}
+
+
