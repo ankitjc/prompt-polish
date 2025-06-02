@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { OPENAI_API_KEY } from "./config";
 import "./App.css";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode"; // for decoding user info
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 // Tones & Simplicity Options
@@ -25,6 +27,7 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [listening, setListening] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
+    const [user, setUser] = useState(null);
 
     const recognitionRef = useRef(null);
 
@@ -92,65 +95,92 @@ function App() {
         setHasGenerated(false);
     }, [keywords]);
 
+    const handleGoogleLogin = (credentialResponse) => {
+        const decoded = jwtDecode(credentialResponse.credential);
+        setUser(decoded);
+        console.log("User Info:", decoded);
+    };
+
+    const handleGoogleLoginError = () => {
+        console.error("Google Login Failed");
+    };
+
     return (
         <div className="App">
-            <h1>🤖💬 PromptBuddy</h1>
-            <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
 
-            <textarea
-                placeholder="e.g. tired, homework, late night"
-                value={keywords}
-                onChange={(e) => setKeywords(e.target.value)}
-            />
+            {!user ? (
+                <GoogleLogin
+                    onSuccess={handleGoogleLogin}
+                    onError={handleGoogleLoginError}
+                />
+            ) : (
+                <div>
+                    <p>👋 Hello, {user.name}</p>
 
-            <button onClick={startListening} disabled={listening}>
-                {listening ? "Listening..." : "🎤 Speak Keywords"}
-            </button>
 
-            <div className="controls">
-                <div className="emoji-options">
-                    <p><strong>Tone:</strong></p>
-                    <div className="option-group">
-                        {toneOptions.map((opt) => (
-                            <button
-                                key={opt.value}
-                                className={`emoji-button ${tone === opt.value ? "selected" : ""}`}
-                                onClick={() => setTone(opt.value)}
-                            >
-                                {opt.emoji} {opt.label}
-                            </button>
-                        ))}
+                    <h1>🤖💬 PromptBuddy</h1>
+                    <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
+
+                    <textarea
+                        placeholder="e.g. tired, homework, late night"
+                        value={keywords}
+                        onChange={(e) => setKeywords(e.target.value)}
+                    />
+
+                    <button onClick={startListening} disabled={listening}>
+                        {listening ? "Listening..." : "🎤 Speak Keywords"}
+                    </button>
+
+                    <div className="controls">
+                        <div className="emoji-options">
+                            <p><strong>Tone:</strong></p>
+                            <div className="option-group">
+                                {toneOptions.map((opt) => (
+                                    <button
+                                        key={opt.value}
+                                        className={`emoji-button ${tone === opt.value ? "selected" : ""}`}
+                                        onClick={() => setTone(opt.value)}
+                                    >
+                                        {opt.emoji} {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <p><strong>Simplicity:</strong></p>
+                            <div className="option-group">
+                                {simplicityOptions.map((opt) => (
+                                    <button
+                                        key={opt.value}
+                                        className={`emoji-button ${simplicity === opt.value ? "selected" : ""}`}
+                                        onClick={() => setSimplicity(opt.value)}
+                                    >
+                                        {opt.emoji} {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
-                    <p><strong>Simplicity:</strong></p>
-                    <div className="option-group">
-                        {simplicityOptions.map((opt) => (
-                            <button
-                                key={opt.value}
-                                className={`emoji-button ${simplicity === opt.value ? "selected" : ""}`}
-                                onClick={() => setSimplicity(opt.value)}
-                            >
-                                {opt.emoji} {opt.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
+                    <button onClick={generateSentence} disabled={loading || !keywords.trim()}>
+                        {loading
+                            ? <span className="loader"></span>
+                            : hasGenerated
+                                ? "🔁 Regenerate Sentence"
+                                : "🚀 Generate Sentence"}
+                    </button>
 
-            <button onClick={generateSentence} disabled={loading || !keywords.trim()}>
-                {loading
-                    ? <span className="loader"></span>
-                    : hasGenerated
-                        ? "🔁 Regenerate Sentence"
-                        : "🚀 Generate Sentence"}
-            </button>
-
-            {sentence && (
-                <div className="output">
-                    <p>{sentence}</p>
-                    <h4 className="ai-label">🌟 AI Generated Sentence</h4>
+                    {sentence && (
+                        <div className="output">
+                            <p>{sentence}</p>
+                            <h4 className="ai-label">🌟 AI Generated Sentence</h4>
+                        </div>
+                    )}
                 </div>
+
+
             )}
+
+
         </div>
     );
 }
