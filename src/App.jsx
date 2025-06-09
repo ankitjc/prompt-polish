@@ -109,10 +109,13 @@ function App() {
         <div className="App">
 
             {!user ? (
-                <GoogleLogin
-                    onSuccess={handleGoogleLogin}
-                    onError={handleGoogleLoginError}
-                />
+                <div>
+                    <h1>🤖💬 PromptBuddy</h1>
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={handleGoogleLoginError}
+                    />
+                </div>
             ) : (
                 <div>
                     <p>👋 Hello, {user.name}</p>
