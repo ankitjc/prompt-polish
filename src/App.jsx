@@ -28,6 +28,7 @@ function App() {
     const [listening, setListening] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
     const [user, setUser] = useState(null);
+    const [loggedIn, setLoggedIn] = useState(false);
 
     const recognitionRef = useRef(null);
 
@@ -98,6 +99,7 @@ function App() {
     const handleGoogleLogin = (credentialResponse) => {
         const decoded = jwtDecode(credentialResponse.credential);
         setUser(decoded);
+        setLoggedIn(true);
         console.log("User Info:", decoded);
     };
 
@@ -108,7 +110,7 @@ function App() {
     return (
         <div className="App">
 
-            {!user ? (
+            {!loggedIn ? (
                 <div>
                     <h1>🤖💬 PromptBuddy</h1>
                     <GoogleLogin
@@ -119,7 +121,6 @@ function App() {
             ) : (
                 <div>
                     <p>👋 Hello, {user.name}</p>
-
 
                     <h1>🤖💬 PromptBuddy</h1>
                     <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
