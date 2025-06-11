@@ -28,7 +28,11 @@ function App() {
     const [listening, setListening] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
     const [user, setUser] = useState(null);
-    const [loggedIn, setLoggedIn] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(() => {
+        // Check localStorage on initial load
+        const saved = localStorage.getItem("loggedIn");
+        return saved === "true"; // convert string to boolean
+    });
 
     const recognitionRef = useRef(null);
 
@@ -96,11 +100,17 @@ function App() {
         setHasGenerated(false);
     }, [keywords]);
 
+    useEffect(() => {
+        // Update localStorage whenever loggedIn changes
+        localStorage.setItem("loggedIn", loggedIn+"");
+    }, [loggedIn]);
+
     const handleGoogleLogin = (credentialResponse) => {
         const decoded = jwtDecode(credentialResponse.credential);
         setUser(decoded);
         setLoggedIn(true);
         console.log("User Info:", decoded);
+        console.log("Logged:", loggedIn);
     };
 
     const handleGoogleLoginError = () => {
