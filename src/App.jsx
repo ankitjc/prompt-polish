@@ -27,7 +27,7 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [listening, setListening] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState({name: "Test User", email: ""});
     const [loggedIn, setLoggedIn] = useState(false);
     // const [loggedIn, setLoggedIn] = useState(() => {
     //     // Check localStorage on initial load
@@ -110,8 +110,6 @@ function App() {
         const decoded = jwtDecode(credentialResponse.credential);
         setUser(decoded);
         setLoggedIn(true);
-        console.log("User Info:", decoded);
-        console.log("Logged:", loggedIn);
     };
 
     const handleGoogleLoginError = () => {
@@ -123,7 +121,7 @@ function App() {
 
             {!loggedIn ? (
                 <div>
-                    <h1>🤖💬 PromptBuddy</h1>
+                    <h1>🤖💬 PromptPolish</h1>
                     <GoogleLogin
                         onSuccess={handleGoogleLogin}
                         onError={handleGoogleLoginError}
@@ -133,18 +131,21 @@ function App() {
                 <div>
                     <p>👋 Hello, {user.name}</p>
 
-                    <h1>🤖💬 PromptBuddy</h1>
+                    <h1>🤖💬 PromptPolish</h1>
                     <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
 
-                    <textarea
-                        placeholder="e.g. tired, homework, late night"
-                        value={keywords}
-                        onChange={(e) => setKeywords(e.target.value)}
-                    />
-
-                    <button onClick={startListening} disabled={listening}>
-                        {listening ? "Listening..." : "🎤 Speak Keywords"}
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <textarea
+                            placeholder="e.g. tired, homework, late night"
+                            value={keywords}
+                            onChange={(e) => setKeywords(e.target.value)}
+                            style={{ resize: "none", width: "400px", height: "80px" }}
+                        />
+                        <button style={{ width: "150px", height: "110px" }}
+                                onClick={startListening} disabled={listening}>
+                            {listening ? "Listening..." : "🎤 Speak"}
+                        </button>
+                    </div>
 
                     <div className="controls">
                         <div className="emoji-options">
