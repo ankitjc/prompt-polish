@@ -188,7 +188,7 @@ function App() {
                     {sentence && (
                         <div className="output">
                             <p>{sentence}</p>
-                            <h4 className="ai-label">✨AI Generated Sentence</h4>
+                            <h4 className="ai-label">✨ AI Generated Sentence</h4>
                         </div>
                     )}
                 </div>
