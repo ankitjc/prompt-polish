@@ -27,13 +27,18 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [listening, setListening] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
-    const [user, setUser] = useState({name: "Test User", email: ""});
-    const [loggedIn, setLoggedIn] = useState(false);
-    // const [loggedIn, setLoggedIn] = useState(() => {
-    //     // Check localStorage on initial load
-    //     const saved = localStorage.getItem("loggedIn");
-    //     return saved === "true"; // convert string to boolean
-    // });
+    const [user, setUser] = useState(() => {
+        return {
+            name : localStorage.getItem("name"),
+            email: localStorage.getItem("email")
+        };
+    });
+    // const [loggedIn, setLoggedIn] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(() => {
+        // Check localStorage on initial load
+        const loggedIn = localStorage.getItem("loggedIn");
+        return loggedIn === "true"; // convert string to boolean
+    });
 
     const recognitionRef = useRef(null);
 
@@ -101,10 +106,16 @@ function App() {
         setHasGenerated(false);
     }, [keywords]);
 
-    // useEffect(() => {
-    //     // Update localStorage whenever loggedIn changes
-    //     localStorage.setItem("loggedIn", loggedIn+"");
-    // }, [loggedIn]);
+    useEffect(() => {
+        // Update localStorage whenever loggedIn changes
+        localStorage.setItem("loggedIn", loggedIn+"");
+    }, [loggedIn]);
+
+    useEffect(() => {
+        // Update localStorage whenever loggedIn changes
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("name", user.name);
+    }, [user]);
 
     const handleGoogleLogin = (credentialResponse) => {
         const decoded = jwtDecode(credentialResponse.credential);
@@ -115,6 +126,10 @@ function App() {
     const handleGoogleLoginError = () => {
         console.error("Google Login Failed");
     };
+
+    const logout = () => {
+        setLoggedIn(false);
+    }
 
     return (
         <div className="App">
@@ -129,19 +144,23 @@ function App() {
                 </div>
             ) : (
                 <div>
-                    <p>👋 Hello, {user.name}</p>
-
+                    <div className="header">
+                        <div className="user-controls">
+                            <p className="welcome">👋 Hello, {user.name}</p>
+                            <button className="logout-button" onClick={logout}>Logout</button>
+                        </div>
+                    </div>
                     <h1>🤖💬 PromptPolish</h1>
                     <p>Speak or type a few keywords. We'll turn them into a sentence!</p>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{display: "flex", alignItems: "center", gap: "8px"}}>
                         <textarea
                             placeholder="e.g. tired, homework, late night"
                             value={keywords}
                             onChange={(e) => setKeywords(e.target.value)}
-                            style={{ resize: "none", width: "400px", height: "80px" }}
+                            style={{resize: "none", width: "400px", height: "80px"}}
                         />
-                        <button style={{ width: "150px", height: "110px" }}
+                        <button style={{width: "150px", height: "110px"}}
                                 onClick={startListening} disabled={listening}>
                             {listening ? "Listening..." : "🎤 Speak"}
                         </button>
