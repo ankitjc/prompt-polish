@@ -21,11 +21,16 @@ body {
   align-items: center;
   border-bottom: 1px solid var(--primary-light);
 }
+.system-controls {
+  font-size: 0.8em;
+  text-align: center;
+}
 
 .user-controls {
+  text-align: right;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px; /* space between greeting and button */
 }
 
 .welcome {
