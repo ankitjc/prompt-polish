@@ -19,6 +19,8 @@ const simplicityOptions = [
     { label: "Advanced", value: "advanced", emoji: "🧬" },
 ];
 
+const DAILY_LIMIT = 20;
+
 function App() {
     const [keywords, setKeywords] = useState("");
     const [tone, setTone] = useState("casual");
@@ -96,10 +98,12 @@ function App() {
             }),
         });
 
+        console.log("got results");
         const data = await res.json();
         setSentence(data.choices?.[0]?.message?.content.trim() || "Something went wrong.");
         setLoading(false);
         setHasGenerated(true); // ✅ Set this flag
+        incrementApiUsage();
     };
 
     useEffect(() => {
@@ -129,6 +133,32 @@ function App() {
 
     const logout = () => {
         setLoggedIn(false);
+    }
+
+    const getTodayKey = () => {
+        const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+        const email = localStorage.getItem("email");
+        return `api-usage-${email}-${today}`;
+    }
+
+    const getApiUsage = () => {
+        const key = getTodayKey();
+        const usage = localStorage.getItem(key);
+        return usage ? parseInt(usage) : 0;
+    }
+
+    const incrementApiUsage = () => {
+        const key = getTodayKey();
+        const current = getApiUsage();
+        localStorage.setItem(key, current + 1);
+    }
+
+    const canMakeApiCall = () => {
+        return getApiUsage() < DAILY_LIMIT;
+    }
+
+    const getRemainingCalls = () => {
+        return DAILY_LIMIT - getApiUsage();
     }
 
     return (
@@ -196,13 +226,16 @@ function App() {
                         </div>
                     </div>
 
-                    <button onClick={generateSentence} disabled={loading || !keywords.trim()}>
+                    <button onClick={generateSentence} disabled={!canMakeApiCall() || loading || !keywords.trim()}>
                         {loading
                             ? <span className="loader"></span>
                             : hasGenerated
                                 ? "🔁 Regenerate Sentence"
                                 : "🚀 Generate Sentence"}
                     </button>
+                    <div className="system-controls">
+                        🪙 Remaining tokens today: {getRemainingCalls()}
+                    </div>
 
                     {sentence && (
                         <div className="output">
