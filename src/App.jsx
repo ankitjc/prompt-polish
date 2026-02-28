@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { OPENAI_API_KEY } from "./config";
 import "./App.css";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; // for decoding user info
@@ -35,6 +34,7 @@ function App() {
             email: localStorage.getItem("email")
         };
     });
+
     // const [loggedIn, setLoggedIn] = useState(false);
     const [loggedIn, setLoggedIn] = useState(() => {
         // Check localStorage on initial load
@@ -82,28 +82,30 @@ function App() {
     const generateSentence = async () => {
         if (!keywords.trim()) return;
         setLoading(true);
-        const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". Tone: ${tone}. Language complexity: ${simplicity}.
-        If the keywords contains only abbreviations or internet slang, just expand them.`;
+        try {
+            const res = await fetch("/api/generate-sentence", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    keywords,
+                    tone,
+                    simplicity,
+                }),
+            });
 
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${OPENAI_API_KEY}`,
-            },
-            body: JSON.stringify({
-                model: "gpt-4.1-nano",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 60,
-            }),
-        });
+            const data = await res.json();
 
-        console.log("got results");
-        const data = await res.json();
-        setSentence(data.choices?.[0]?.message?.content.trim() || "Something went wrong.");
+            setSentence(data.sentence || "Something went wrong.");
+            setHasGenerated(true);
+            incrementApiUsage();
+        } catch (error) {
+            console.error("Frontend error:", error);
+            setSentence("Server error.");
+        }
+
         setLoading(false);
-        setHasGenerated(true); // ✅ Set this flag
-        incrementApiUsage();
     };
 
     useEffect(() => {
