@@ -81,22 +81,18 @@ function App() {
 
     const generateSentence = async () => {
         if (!keywords.trim()) return;
+        console.log("Generating sentence...");
+
         setLoading(true);
+
+
         try {
             const res = await fetch("/api/generate-sentence", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    keywords,
-                    tone,
-                    simplicity,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ keywords, tone, simplicity }),
             });
-
             const data = await res.json();
-
             setSentence(data.sentence || "Something went wrong.");
             setHasGenerated(true);
             incrementApiUsage();
