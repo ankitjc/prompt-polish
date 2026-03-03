@@ -67,6 +67,22 @@ function Cards() {
         setLoading(false);
     };
 
+    const speak = (text) => {
+        if (!window.speechSynthesis) {
+            alert("Speech not supported in this browser.");
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        utterance.rate = 0.85;      // Speed (0.5 to 2)
+        utterance.pitch = 1;     // Tone (0 to 2)
+        utterance.volume = 1;    // Volume (0 to 1)
+
+        window.speechSynthesis.cancel(); // Stop previous speech
+        window.speechSynthesis.speak(utterance);
+    };
+
     return (
         <div>
             <p>Enter a word to generate communication cards</p>
@@ -136,6 +152,7 @@ function Cards() {
                 {cards.map((card, index) => (
                     <div
                         key={index}
+                        onClick={() => speak(card)}
                         style={{
                             border: "1px solid #ccc",
                             borderRadius: "8px",
