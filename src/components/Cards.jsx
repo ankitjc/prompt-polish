@@ -138,14 +138,26 @@ function Cards() {
                         key={index}
                         style={{
                             border: "1px solid #ccc",
-                            borderRadius: "5px",
+                            borderRadius: "8px",
                             padding: "12px",
-                            textAlign: "center"
+                            textAlign: "center",
+                            backgroundColor: "#fff",
+                            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)", // subtle shadow
+                            transition: "transform 0.2s ease, box-shadow 0.2s ease", // smooth hover
+                            cursor: "pointer"
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "translateY(-3px)";
+                            e.currentTarget.style.boxShadow = "0 6px 15px rgba(0,0,0,0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.1)";
                         }}
                     >
                         <img
                             src="/images/placeholder.png"
-                            alt={"placeholder"}
+                            alt="placeholder"
                             style={{ width: "100px", borderRadius: "8px" }}
                         />
                         <p>{card}</p>
