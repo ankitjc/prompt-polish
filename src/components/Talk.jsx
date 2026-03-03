@@ -1,7 +1,6 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {OPENAI_API_KEY} from "../config.js";
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 // Tones & Simplicity Options
 const toneOptions = [
     { label: "Casual", value: "casual", emoji: "🧢" },
@@ -25,44 +24,7 @@ function Talk() {
     const [simplicity, setSimplicity] = useState("simple");
     const [sentence, setSentence] = useState("");
     const [loading, setLoading] = useState(false);
-    const [listening, setListening] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
-    const recognitionRef = useRef(null);
-
-    useEffect(() => {
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.lang = "en-US";
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                setKeywords(transcript);
-                setListening(false);
-            };
-
-            recognition.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
-                setListening(false);
-            };
-
-            recognition.onend = () => {
-                setListening(false);
-            };
-
-            recognitionRef.current = recognition;
-        } else {
-            alert("Your browser does not support speech recognition.");
-        }
-    }, []);
-
-    const startListening = () => {
-        if (recognitionRef.current && !listening) {
-            recognitionRef.current.start();
-            setListening(true);
-        }
-    };
 
     const getTodayKey = () => {
         const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
@@ -93,7 +55,9 @@ function Talk() {
     const generateSentence = async () => {
         if (!keywords.trim()) return;
         setLoading(true);
-        const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". Tone: ${tone}. Language complexity: ${simplicity}.
+        const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". 
+        Tone: ${tone}. 
+        Language complexity: ${simplicity}.
         If the keywords contains only abbreviations or internet slang, just expand them.`;
 
         const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -129,11 +93,27 @@ function Talk() {
                                 placeholder="e.g. tired, homework, late night"
                                 value={keywords}
                                 onChange={(e) => setKeywords(e.target.value)}
-                                style={{resize: "none", width: "400px", height: "80px"}}
+                                style={{resize: "none", width: "340px", height: "80px"}}
                             />
-            <button style={{width: "150px", height: "110px"}}
-                    onClick={startListening} disabled={listening}>
-                {listening ? "Listening..." : "🎤 Speak"}
+            <button  style={{
+                padding: "14px 20px",
+                fontSize: "16px",
+                borderRadius: "12px",
+                border: "none",
+                backgroundColor: "#6366f1",
+                color: "white",
+                cursor: "pointer",
+                fontWeight: "500",
+                transition: "all 0.2s ease",
+                opacity: loading ? 0.7 : 1,
+            }}
+                     onClick={generateSentence}
+                     disabled={!canMakeApiCall() || loading || !keywords.trim()}>
+                {loading
+                    ? <span className="loader"></span>
+                    : hasGenerated
+                        ? "🔁 Regenerate Sentence"
+                        : "🚀 Generate Sentence"}
             </button>
         </div>
 
@@ -167,13 +147,6 @@ function Talk() {
             </div>
         </div>
 
-        <button onClick={generateSentence} disabled={!canMakeApiCall() || loading || !keywords.trim()}>
-            {loading
-                ? <span className="loader"></span>
-                : hasGenerated
-                    ? "🔁 Regenerate Sentence"
-                    : "🚀 Generate Sentence"}
-        </button>
         <div className="system-controls">
             🪙 Remaining tokens today: {getRemainingCalls()}
         </div>

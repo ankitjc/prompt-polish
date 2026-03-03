@@ -207,3 +207,42 @@ button:disabled {
   font-style: italic;
   text-align: right;
 }
+
+/* Full-width tab bar */
+.tab-switcher {
+  display: flex;
+  width: 100%;
+  background-color: #f3f4f6; /* light grey background */
+}
+
+/* Each tab takes 50% */
+.tab-switcher .tab {
+  flex: 1;
+  text-align: center;
+  padding: 14px 0;
+  border-right: 1px solid #d1d5db; /* separator between tabs */
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280; /* inactive grey */
+  transition: background 0.2s ease, color 0.2s ease;
+  border-bottom: 4px solid #a8a8ae;
+}
+
+/* Remove right border for the last tab */
+.tab-switcher .tab:last-child {
+  border-right: none;
+}
+
+/* Active tab styling */
+.tab-switcher .tab.active {
+  background-color: #3b82f6; /* solid blue */
+  color: white;
+  border-bottom: 4px solid #27519a;
+}
+
+/* Hover effect for inactive tabs */
+.tab-switcher .tab:hover:not(.active) {
+  background-color: #e5e7eb; /* slightly darker grey */
+  border-bottom: 4px solid #a8a8ae;
+}

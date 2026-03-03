@@ -62,7 +62,7 @@ function App() {
             ) : (
                 <div>
                     <div className="header">
-                        <div style={{marginRight:'110px'}} className="logo">
+                        <div style={{marginRight:'110px', paddingBottom: '10px'}} className="logo">
                             <h1>🤖💬 PromptPolish</h1>
                         </div>
 
@@ -74,18 +74,19 @@ function App() {
 
                     {/* 🔁 Feature Switch */}
                     <div className="tab-switcher">
-                        <button
-                            className={activeTab === "talk" ? "active" : ""}
+                        <div
+                            className={`tab ${activeTab === "talk" ? "active" : ""}`}
                             onClick={() => setActiveTab("talk")}
                         >
                             🗣 Talk
-                        </button>
-                        <button
-                            className={activeTab === "cards" ? "active" : ""}
+                        </div>
+
+                        <div
+                            className={`tab ${activeTab === "cards" ? "active" : ""}`}
                             onClick={() => setActiveTab("cards")}
                         >
                             🧩 Cards
-                        </button>
+                        </div>
                     </div>
 
                     {activeTab === "talk" && <Talk />}
