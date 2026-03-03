@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {OPENAI_API_KEY} from "../config.js";
 
 function Cards() {
     const [word, setWord] = useState("");
@@ -10,19 +11,57 @@ function Cards() {
 
         setLoading(true);
 
-        try {
-            const exampleResponse = [
-                { text: "Hello", image: "../images/placeholder.png" },
-                { text: "How are you?", image: "../images/placeholder.png" },
-                { text: "I feel good", image: "../images/placeholder.png" },
-                { text: "I don’t feel well", image: "../images/placeholder.png" },
-                { text: "Thank you", image: "../images/placeholder.png" },
-                { text: "Goodbye", image: "../images/placeholder.png" }
-            ];
+        const prompt = `
+            Generate 6 short, practical conversational phrases someone might use when dealing with "${word}".
 
-            setCards(exampleResponse);
-        } catch (err) {
-            console.error(err);
+            IMPORTANT:
+            - Include at least:
+              • 1 greeting (like "Hello", "Good morning")
+              • 1 polite closing or gratitude phrase (like "Thank you")
+            - The rest should be useful situation-specific phrases.
+            - Keep phrases very simple.
+            - Each phrase should be under 5 words.
+            - Make them natural and easy to say.
+            - Return ONLY a JSON array of strings.
+        
+            Example format:
+            ["Hello", "I need help", "Thank you"]
+            `;
+
+        try {
+            const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-4.1-nano",
+                    messages: [{ role: "user", content: prompt }],
+                    max_tokens: 150,
+                    temperature: 0.7
+                }),
+            });
+
+            const data = await res.json();
+
+            const content = data.choices?.[0]?.message?.content;
+
+            // Parse JSON safely
+            let cards;
+            try {
+                cards = JSON.parse(content);
+            } catch {
+                cards = ["Sorry, something went wrong."];
+            }
+
+            console.log(cards);
+
+            setCards(cards);
+
+        } catch (error) {
+            console.error(error);
+            setCards(["Something went wrong."]);
         }
 
         setLoading(false);
@@ -32,14 +71,56 @@ function Cards() {
         <div>
             <p>Enter a word to generate communication cards</p>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div
+                style={{
+                    display: "flex",
+                    gap: "12px",
+                    width: "100%",
+                    maxWidth: "600px",
+                    margin: "0 auto",
+                }}
+            >
                 <input
                     type="text"
                     placeholder="e.g. doctor"
                     value={word}
                     onChange={(e) => setWord(e.target.value)}
+                    style={{
+                        flex: 1,
+                        padding: "14px 18px",
+                        fontSize: "16px",
+                        borderRadius: "12px",
+                        border: "1px solid #e0e0e0",
+                        outline: "none",
+                        boxShadow: "0 2px 1px rgba(0,0,0,0.05)",
+                        transition: "all 0.2s ease",
+                    }}
+                    onFocus={(e) =>
+                        (e.target.style.boxShadow =
+                            "0 0 0 1px rgba(99,102,241,0.2)")
+                    }
+                    onBlur={(e) =>
+                        (e.target.style.boxShadow =
+                            "0 2px 6px rgba(0,0,0,0.05)")
+                    }
                 />
-                <button onClick={generateCards} disabled={loading}>
+
+                <button
+                    onClick={generateCards}
+                    disabled={loading}
+                    style={{
+                        padding: "14px 20px",
+                        fontSize: "16px",
+                        borderRadius: "12px",
+                        border: "none",
+                        backgroundColor: "#6366f1",
+                        color: "white",
+                        cursor: "pointer",
+                        fontWeight: "500",
+                        transition: "all 0.2s ease",
+                        opacity: loading ? 0.7 : 1,
+                    }}
+                >
                     {loading ? "Generating..." : "🎨 Generate Cards"}
                 </button>
             </div>
@@ -63,11 +144,11 @@ function Cards() {
                         }}
                     >
                         <img
-                            src={card.image}
-                            alt={card.text}
+                            src="/images/placeholder.png"
+                            alt={"placeholder"}
                             style={{ width: "100px", borderRadius: "8px" }}
                         />
-                        <p>{card.text}</p>
+                        <p>{card}</p>
                     </div>
                 ))}
             </div>
