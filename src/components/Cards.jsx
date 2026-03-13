@@ -1,10 +1,81 @@
 import { useState } from "react";
 import {OPENAI_API_KEY} from "../config.js";
+import "./Cards.css";
 
 function Cards() {
     const [word, setWord] = useState("");
     const [cards, setCards] = useState([]);
+    // cards = [{ text: "Hello", image: "url" }]
     const [loading, setLoading] = useState(false);
+
+    const SkeletonCard = () => {
+        return (
+            <div
+                style={{
+                    border: "1px solid #eee",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    backgroundColor: "#fff",
+                    textAlign: "center"
+                }}
+            >
+                <div
+                    style={{
+                        width: "100px",
+                        height: "100px",
+                        margin: "0 auto",
+                        borderRadius: "8px",
+                        background: "#e5e7eb",
+                        animation: "pulse 1.5s infinite"
+                    }}
+                />
+
+                <div
+                    style={{
+                        height: "12px",
+                        marginTop: "10px",
+                        borderRadius: "4px",
+                        background: "#e5e7eb",
+                        animation: "pulse 1.5s infinite"
+                    }}
+                />
+            </div>
+        );
+    };
+
+    const generateImage = async (phrase) => {
+        try {
+            const res = await fetch("https://api.openai.com/v1/images/generations", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-image-1-mini",
+                    prompt: `Simple icon style illustration for communication card: ${phrase}`,
+                    size: "256x256",
+                    quality: "low"
+                }),
+            });
+
+            const data = await res.json();
+
+            const base64 = data.data?.[0]?.b64_json;
+
+            if (!base64) return "/images/placeholder.png";
+
+            const imageUrl = `data:image/png;base64,${base64}`;
+
+            console.log("Generated image:", imageUrl);
+
+            return imageUrl;
+
+        } catch (err) {
+            console.error(err);
+            return "/images/placeholder.png";
+        }
+    };
 
     const generateCards = async () => {
         if (!word.trim()) return;
@@ -55,9 +126,18 @@ function Cards() {
                 cards = ["Sorry, something went wrong."];
             }
 
-            console.log(cards);
+            const cardsWithImages = await Promise.all(
+                cards.map(async (phrase) => {
+                    const image = await generateImage(phrase);
 
-            setCards(cards);
+                    return {
+                        text: phrase,
+                        image: image
+                    };
+                })
+            );
+
+            setCards(cardsWithImages);
 
         } catch (error) {
             console.error(error);
@@ -111,14 +191,6 @@ function Cards() {
                         boxShadow: "0 2px 1px rgba(0,0,0,0.05)",
                         transition: "all 0.2s ease",
                     }}
-                    onFocus={(e) =>
-                        (e.target.style.boxShadow =
-                            "0 0 0 1px rgba(99,102,241,0.2)")
-                    }
-                    onBlur={(e) =>
-                        (e.target.style.boxShadow =
-                            "0 2px 6px rgba(0,0,0,0.05)")
-                    }
                 />
 
                 <button
@@ -133,7 +205,6 @@ function Cards() {
                         color: "white",
                         cursor: "pointer",
                         fontWeight: "500",
-                        transition: "all 0.2s ease",
                         opacity: loading ? 0.7 : 1,
                     }}
                 >
@@ -149,37 +220,41 @@ function Cards() {
                     gap: "15px"
                 }}
             >
-                {cards.map((card, index) => (
-                    <div
-                        key={index}
-                        onClick={() => speak(card)}
-                        style={{
-                            border: "1px solid #ccc",
-                            borderRadius: "8px",
-                            padding: "12px",
-                            textAlign: "center",
-                            backgroundColor: "#fff",
-                            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)", // subtle shadow
-                            transition: "transform 0.2s ease, box-shadow 0.2s ease", // smooth hover
-                            cursor: "pointer"
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = "translateY(-3px)";
-                            e.currentTarget.style.boxShadow = "0 6px 15px rgba(0,0,0,0.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.1)";
-                        }}
-                    >
-                        <img
-                            src="/images/placeholder.png"
-                            alt="placeholder"
-                            style={{ width: "100px", borderRadius: "8px" }}
-                        />
-                        <p>{card}</p>
-                    </div>
-                ))}
+                {loading
+                    ? Array.from({ length: 6 }).map((_, index) => (
+                        <SkeletonCard key={index} />
+                    ))
+                    : cards.map((card, index) => (
+                        <div
+                            key={index}
+                            onClick={() => speak(card.text)}
+                            style={{
+                                border: "1px solid #ccc",
+                                borderRadius: "8px",
+                                padding: "12px",
+                                textAlign: "center",
+                                backgroundColor: "#fff",
+                                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+                                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                                cursor: "pointer"
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-3px)";
+                                e.currentTarget.style.boxShadow = "0 6px 15px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.1)";
+                            }}
+                        >
+                            <img
+                                src={card.image}
+                                alt={card.text}
+                                style={{ width: "100px", borderRadius: "8px" }}
+                            />
+                            <p>{card.text}</p>
+                        </div>
+                    ))}
             </div>
         </div>
     );
