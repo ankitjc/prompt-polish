@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {OPENAI_API_KEY} from "../config.js";
 
 // Tones & Simplicity Options
 const toneOptions = [
@@ -52,34 +51,63 @@ function Talk() {
         return DAILY_LIMIT - getApiUsage();
     }
 
+    // const generateSentence = async () => {
+    //     if (!keywords.trim()) return;
+    //     setLoading(true);
+    //     const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}".
+    //     Tone: ${tone}.
+    //     Language complexity: ${simplicity}.
+    //     If the keywords contains only abbreviations or internet slang, just expand them.`;
+    //
+    //     const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             Authorization: `Bearer ${OPENAI_API_KEY}`,
+    //         },
+    //         body: JSON.stringify({
+    //             model: "gpt-4.1-nano",
+    //             messages: [{ role: "user", content: prompt }],
+    //             max_tokens: 60,
+    //         }),
+    //     });
+    //
+    //     const data = await res.json();
+    //     setSentence(data.choices?.[0]?.message?.content.trim() || "Something went wrong.");
+    //     setLoading(false);
+    //     setHasGenerated(true); // ✅ Set this flag
+    //     incrementApiUsage();
+    // };
     const generateSentence = async () => {
         if (!keywords.trim()) return;
         setLoading(true);
-        const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". 
-        Tone: ${tone}. 
-        Language complexity: ${simplicity}.
-        If the keywords contains only abbreviations or internet slang, just expand them.`;
 
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${OPENAI_API_KEY}`,
-            },
-            body: JSON.stringify({
-                model: "gpt-4.1-nano",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 60,
-            }),
-        });
+        try {
+            const res = await fetch("/api/talk", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    keywords,
+                    tone,
+                    simplicity
+                }),
+            });
 
-        const data = await res.json();
-        setSentence(data.choices?.[0]?.message?.content.trim() || "Something went wrong.");
+            if (!res.ok) throw new Error("API failed");
+
+            const data = await res.json();
+            setSentence(data.sentence || "Something went wrong.");
+            setHasGenerated(true);
+            incrementApiUsage();
+
+        } catch (err) {
+            console.error(err);
+            setSentence("Something went wrong.");
+            setHasGenerated(true);
+        }
+
         setLoading(false);
-        setHasGenerated(true); // ✅ Set this flag
-        incrementApiUsage();
     };
-
     useEffect(() => {
         setHasGenerated(false);
     }, [keywords]);

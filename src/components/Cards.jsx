@@ -1,5 +1,4 @@
 import { useState } from "react";
-import {OPENAI_API_KEY} from "../config.js";
 import "./Cards.css";
 
 function Cards() {
@@ -43,109 +42,144 @@ function Cards() {
         );
     };
 
-    const generateImage = async (phrase) => {
-        try {
-            const res = await fetch("https://api.openai.com/v1/images/generations", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
-                },
-                body: JSON.stringify({
-                    model: "gpt-image-1-mini",
-                    prompt: `Simple icon style illustration for communication card: ${phrase}`,
-                    size: "256x256",
-                    quality: "low"
-                }),
-            });
-
-            const data = await res.json();
-
-            const base64 = data.data?.[0]?.b64_json;
-
-            if (!base64) return "/images/placeholder.png";
-
-            const imageUrl = `data:image/png;base64,${base64}`;
-
-            console.log("Generated image:", imageUrl);
-
-            return imageUrl;
-
-        } catch (err) {
-            console.error(err);
-            return "/images/placeholder.png";
-        }
-    };
-
     const generateCards = async () => {
+
         if (!word.trim()) return;
 
         setLoading(true);
 
-        const prompt = `
-            Generate 6 short, practical conversational phrases someone might use when dealing with "${word}".
-
-            IMPORTANT:
-            - Include at least:
-              • 1 greeting (like "Hello", "Good morning")
-              • 1 polite closing or gratitude phrase (like "Thank you")
-            - The rest should be useful situation-specific phrases.
-            - Keep phrases very simple.
-            - Each phrase should be under 5 words.
-            - Make them natural and easy to say.
-            - Return ONLY a JSON array of strings.
-        
-            Example format:
-            ["Hello", "I need help", "Thank you"]
-            `;
-
         try {
-            const res = await fetch("https://api.openai.com/v1/chat/completions", {
+
+            const res = await fetch("/api/cards", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    model: "gpt-4.1-nano",
-                    messages: [{ role: "user", content: prompt }],
-                    max_tokens: 150,
-                    temperature: 0.7
-                }),
+                body: JSON.stringify({ word })
             });
 
             const data = await res.json();
 
-            const content = data.choices?.[0]?.message?.content;
-
-            // Parse JSON safely
-            let cards;
-            try {
-                cards = JSON.parse(content);
-            } catch {
-                cards = ["Sorry, something went wrong."];
-            }
-
-            const cardsWithImages = await Promise.all(
-                cards.map(async (phrase) => {
-                    const image = await generateImage(phrase);
-
-                    return {
-                        text: phrase,
-                        image: image
-                    };
-                })
-            );
-
-            setCards(cardsWithImages);
+            setCards(data);
 
         } catch (error) {
+
             console.error(error);
-            setCards(["Something went wrong."]);
+
+            setCards([
+                {
+                    text: "Something went wrong",
+                    image: "/images/placeholder.png"
+                }
+            ]);
         }
 
         setLoading(false);
     };
+
+    // const generateImage = async (phrase) => {
+    //     try {
+    //         const res = await fetch("https://api.openai.com/v1/images/generations", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 Authorization: `Bearer ${OPENAI_API_KEY}`,
+    //             },
+    //             body: JSON.stringify({
+    //                 model: "gpt-image-1-mini",
+    //                 prompt: `Simple icon style illustration for communication card: ${phrase}`,
+    //                 size: "256x256",
+    //                 quality: "low"
+    //             }),
+    //         });
+    //
+    //         const data = await res.json();
+    //
+    //         const base64 = data.data?.[0]?.b64_json;
+    //
+    //         if (!base64) return "/images/placeholder.png";
+    //
+    //         const imageUrl = `data:image/png;base64,${base64}`;
+    //
+    //         console.log("Generated image:", imageUrl);
+    //
+    //         return imageUrl;
+    //
+    //     } catch (err) {
+    //         console.error(err);
+    //         return "/images/placeholder.png";
+    //     }
+    // };
+
+    // const generateCards = async () => {
+    //     if (!word.trim()) return;
+    //
+    //     setLoading(true);
+    //
+    //     const prompt = `
+    //         Generate 6 short, practical conversational phrases someone might use when dealing with "${word}".
+    //
+    //         IMPORTANT:
+    //         - Include at least:
+    //           • 1 greeting (like "Hello", "Good morning")
+    //           • 1 polite closing or gratitude phrase (like "Thank you")
+    //         - The rest should be useful situation-specific phrases.
+    //         - Keep phrases very simple.
+    //         - Each phrase should be under 5 words.
+    //         - Make them natural and easy to say.
+    //         - Return ONLY a JSON array of strings.
+    //
+    //         Example format:
+    //         ["Hello", "I need help", "Thank you"]
+    //         `;
+    //
+    //     try {
+    //         const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 Authorization: `Bearer ${OPENAI_API_KEY}`,
+    //             },
+    //             body: JSON.stringify({
+    //                 model: "gpt-4.1-nano",
+    //                 messages: [{ role: "user", content: prompt }],
+    //                 max_tokens: 150,
+    //                 temperature: 0.7
+    //             }),
+    //         });
+    //
+    //         const data = await res.json();
+    //
+    //         const content = data.choices?.[0]?.message?.content;
+    //
+    //         // Parse JSON safely
+    //         let cards;
+    //         try {
+    //             cards = JSON.parse(content);
+    //         } catch {
+    //             cards = ["Sorry, something went wrong."];
+    //         }
+    //
+    //         const cardsWithImages = await Promise.all(
+    //             cards.map(async (phrase) => {
+    //                 const image = await generateImage(phrase);
+    //
+    //                 return {
+    //                     text: phrase,
+    //                     image: image
+    //                 };
+    //             })
+    //         );
+    //
+    //         setCards(cardsWithImages);
+    //
+    //     } catch (error) {
+    //         console.error(error);
+    //         setCards(["Something went wrong."]);
+    //     }
+    //
+    //     setLoading(false);
+    // };
 
     const speak = (text) => {
         if (!window.speechSynthesis) {
