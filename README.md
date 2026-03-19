@@ -15,8 +15,3 @@ If you are developing a production application, we recommend using TypeScript wi
 ## LIVE URL 
 
 https://prompt-polish.vercel.app/
-
-PromptPolishDB
-mkCPJuBCtdDcpsyG
-
-postgresql://postgres:[YOUR-PASSWORD]@db.vpsbsaaypvtwvmhnnuwv.supabase.co:5432/postgres
