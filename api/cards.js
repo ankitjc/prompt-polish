@@ -49,12 +49,18 @@ export default async function handler(req, res) {
             const { data, error } = await supabase
                 .rpc("match_phrases", {
                     query_vector: searchEmbedding,
-                    match_limit: 6
+                    match_limit: 6,
+                    match_threshold: 0.3
                 });
 
             if (error) console.error("Supabase vector search error:", error);
             else cachedCards = data || [];
         }
+
+        console.log(cachedCards.map(c => ({
+            phrase: c.phrase,
+            similarity: c.similarity
+        })));
 
         // Return cached cards if enough
         if (cachedCards.length === 6) {
