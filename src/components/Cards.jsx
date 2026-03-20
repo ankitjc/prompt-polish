@@ -55,12 +55,12 @@ function Cards() {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ word })
+                body: JSON.stringify({ inputText: word })
             });
 
             const data = await res.json();
-
-            setCards(data);
+            const cardsArray = Array.isArray(data.cards) ? data.cards : [];
+            setCards(cardsArray);
 
         } catch (error) {
 
