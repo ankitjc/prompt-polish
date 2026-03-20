@@ -3,3 +3,27 @@
     50% { opacity: 0.4; }
     100% { opacity: 1; }
 }
+
+/* Badge base */
+.badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    opacity: 0.7;
+    backdrop-filter: blur(4px);
+}
+
+/* Optional subtle color difference */
+.badge.reused {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.badge.generated {
+    background: rgba(0, 255, 255, 0.6);
+    color: #333;
+}

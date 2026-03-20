@@ -39,7 +39,7 @@ async function getEmbedding(phrase) {
 
 // Generate image and insert card into Supabase
 async function createCard(searchTerm, phrase, embedding) {
-    console.log(` -- Generating image for '${phrase}'...`);
+    console.log(`-- Generating image for '${phrase}'...`);
     let imageUrl = "/images/placeholder.png";
 
     try {
@@ -80,7 +80,7 @@ async function createCard(searchTerm, phrase, embedding) {
         console.warn("Supabase insert failed:", err.message);
     }
 
-    return { text: phrase, image: imageUrl };
+    return { text: phrase, image: imageUrl, source: "generated" };
 }
 
 // API Handler
@@ -97,6 +97,7 @@ export default async function handler(req, res) {
           Generate 6 common short phrases (max 5 words)
           that a person might say in this situation: "${inputText}".
           Keep them simple, conversational, and distinct.
+          If interacting with a person - include greetings like hello, good bye etc.
           Return JSON array only.
         `;
 
@@ -130,8 +131,8 @@ export default async function handler(req, res) {
                 const data = matchResults[i].data;
                 if (data && data.length > 0) {
                     // reuse existing
-                    console.log(`++ Reusing image for '${phrase}'...`);
-                    return { text: data[0].phrase, image: data[0].image_url };
+                    console.log(`++ Reusing image for '${phrase}'`);
+                    return { text: data[0].phrase, image: data[0].image_url, source: "reused" };
                 } else {
                     // create new card (slowest step)
                     const embedding = embeddings[i];
