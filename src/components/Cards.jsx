@@ -1,9 +1,12 @@
 import { useState } from "react";
 import "./Cards.css";
+import HandTracker from "./HandTracker";
 
 function Cards() {
     const [word, setWord] = useState("");
     const [cards, setCards] = useState([]);
+    const [cursor, setCursor] = useState({ x: 0.5, y: 0.5 });
+
     // cards = [{ text: "Hello", image: "url" }]
     const [loading, setLoading] = useState(false);
 
@@ -40,6 +43,28 @@ function Cards() {
                 />
             </div>
         );
+    };
+
+    // 👉 Smooth cursor movement
+    const handleMove = ({ x, y }) => {
+        setCursor((prev) => ({
+            x: prev.x * 0.7 + x * 0.3,
+            y: prev.y * 0.7 + y * 0.3,
+        }));
+    };
+
+    // 👉 Click detection
+    const handleClick = () => {
+        const x = cursor.x * window.innerWidth;
+        const y = cursor.y * window.innerHeight;
+
+        const elements = document.elementsFromPoint(x, y);
+
+        const cardEl = elements.find((el) => el.dataset?.card);
+
+        if (cardEl) {
+            cardEl.click();
+        }
     };
 
     const generateCards = async () => {
@@ -94,9 +119,10 @@ function Cards() {
     };
 
     return (
-        <div>
+        <div style={{ position: "relative" }}>
             <p>Enter a word to generate communication cards</p>
 
+            {/* Input + Button */}
             <div
                 style={{
                     display: "flex",
@@ -142,23 +168,25 @@ function Cards() {
                 </button>
             </div>
 
+            {/* Cards Grid */}
             <div
                 style={{
                     marginTop: "20px",
                     display: "grid",
                     gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "15px"
+                    gap: "15px",
+                    position: "relative",
                 }}
             >
                 {loading
-                    ? Array.from({ length: 6 }).map((_, index) => (
-                        <SkeletonCard key={index} />
-                    ))
+                    ? Array.from({ length: 6 }).map((_, index) => <SkeletonCard key={index} />)
                     : cards.map((card, index) => (
                         <div
                             key={index}
+                            className="hand-card"
                             onClick={() => speak(card.text)}
                             style={{
+                                position: "relative",
                                 border: "1px solid #ccc",
                                 borderRadius: "8px",
                                 padding: "12px",
@@ -166,7 +194,7 @@ function Cards() {
                                 backgroundColor: "#fff",
                                 boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
                                 transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                                cursor: "pointer"
+                                cursor: "pointer",
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = "translateY(-3px)";
@@ -177,19 +205,81 @@ function Cards() {
                                 e.currentTarget.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.1)";
                             }}
                         >
-                            <span className={`badge ${card.source}`}>
-                              {card.source === "reused" ? "Cached" : "New"}
-                            </span>
+                            {/* Subtle badge */}
+                            <span
+                                className={`badge ${card.source}`}
+                                style={{
+                                    position: "absolute",
+                                    top: "6px",
+                                    right: "6px",
+                                    fontSize: "8px",
+                                    padding: "2px 6px",
+                                    borderRadius: "999px",
+                                    color: "white",
+                                    opacity: 0.7,
+                                }}
+                            >
+                {card.source === "reused" ? "Cached" : "New"}
+              </span>
+
                             <img
                                 src={card.image}
                                 alt={card.text}
                                 style={{ width: "100px", borderRadius: "8px" }}
                             />
                             <p>{card.text}</p>
-
                         </div>
                     ))}
             </div>
+
+            {/* Hand Tracking */}
+            <HandTracker
+                onMove={({ x, y }) => {
+                    // convert relative x,y to page coordinates
+                    const px = x * window.innerWidth;
+                    const py = y * window.innerHeight;
+
+                    const cursorEl = document.getElementById("hand-cursor");
+                    if (cursorEl) {
+                        cursorEl.style.left = `${px}px`;
+                        cursorEl.style.top = `${py}px`;
+                    }
+                }}
+                onClick={() => {
+                    const cursorEl = document.getElementById("hand-cursor");
+                    if (!cursorEl) return;
+
+                    // Flash the cursor color on click
+                    const originalColor = cursorEl.style.backgroundColor;
+                    cursorEl.style.backgroundColor = "green"; // change to desired color
+
+                    setTimeout(() => {
+                        cursorEl.style.backgroundColor = originalColor;
+                    }, 200); // revert after 200ms
+
+                    const elements = document.elementsFromPoint(
+                        parseFloat(cursorEl.style.left),
+                        parseFloat(cursorEl.style.top)
+                    );
+                    const cardEl = elements.find((el) => el.classList.contains("hand-card"));
+                    if (cardEl) cardEl.click();
+                }}
+            />
+
+            {/* Cursor */}
+            <div
+                id="hand-cursor"
+                style={{
+                    position: "fixed",
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(255,0,0,0.8)",
+                    pointerEvents: "none",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 9999,
+                }}
+            />
         </div>
     );
 }

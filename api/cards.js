@@ -65,7 +65,7 @@ async function createCard(searchTerm, phrase, embedding) {
         console.warn(`Image generation failed for phrase "${phrase}":`, err.message);
     }
 
-    console.log("Saving card to Supabase...");
+    console.log("Saving card embeddings to Supabase...");
     try {
         const { error: insertError } = await supabase.from("cards").insert([
             {
