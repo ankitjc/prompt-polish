@@ -4,6 +4,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; // for decoding user info
 import Talk from "./components/Talk";
 import Cards from "./components/Cards";
+import Picture from "./components/Picture.jsx";
 
 function App() {
 
@@ -87,10 +88,21 @@ function App() {
                         >
                             🧩 Cards
                         </div>
+
+                        <div
+                            className={`tab ${
+                                activeTab === "picture" ? "active" : ""
+                            }`}
+                            onClick={() => setActiveTab("picture")}
+                        >
+                            📷 Picture
+                        </div>
+
                     </div>
 
                     {activeTab === "talk" && <Talk />}
                     {activeTab === "cards" && <Cards />}
+                    {activeTab === "picture" && <Picture />}
                 </div>
             )}
         </div>

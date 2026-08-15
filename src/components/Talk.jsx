@@ -51,33 +51,6 @@ function Talk() {
         return DAILY_LIMIT - getApiUsage();
     }
 
-    // const generateSentence = async () => {
-    //     if (!keywords.trim()) return;
-    //     setLoading(true);
-    //     const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}".
-    //     Tone: ${tone}.
-    //     Language complexity: ${simplicity}.
-    //     If the keywords contains only abbreviations or internet slang, just expand them.`;
-    //
-    //     const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             Authorization: `Bearer ${OPENAI_API_KEY}`,
-    //         },
-    //         body: JSON.stringify({
-    //             model: "gpt-4.1-nano",
-    //             messages: [{ role: "user", content: prompt }],
-    //             max_tokens: 60,
-    //         }),
-    //     });
-    //
-    //     const data = await res.json();
-    //     setSentence(data.choices?.[0]?.message?.content.trim() || "Something went wrong.");
-    //     setLoading(false);
-    //     setHasGenerated(true); // ✅ Set this flag
-    //     incrementApiUsage();
-    // };
     const generateSentence = async () => {
         if (!keywords.trim()) return;
         setLoading(true);
