@@ -7,22 +7,28 @@ export default async function handler(req, res) {
 
     try {
         const prompt = `Generate a complete, meaningful sentence from these keywords: "${keywords}". 
-Tone: ${tone}. 
-Language complexity: ${simplicity}.
-If the keywords contains only abbreviations or internet slang, just expand them.`;
+        Tone: ${tone}. 
+        Language complexity: ${simplicity}.
+        If the keywords contains only abbreviations or internet slang, just expand them.`;
 
         const completion = await openai.chat.completions.create({
-            model: "gpt-4.1-nano",
+            model: "gpt-5-nano",
             messages: [{ role: "user", content: prompt }],
-            max_tokens: 60,
+            max_completion_tokens: 1000
         });
 
         const sentence = completion.choices?.[0]?.message?.content?.trim() || "";
 
         res.status(200).json({ sentence });
 
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error("========== OPENAI ERROR ==========");
+        console.error("Message:", error.message);
+        console.error("Status:", error.status);
+        console.error("Code:", error.code);
+        console.error("Type:", error.type);
+        console.error("===================================");
+
         res.status(500).json({ sentence: "Something went wrong." });
     }
 }
