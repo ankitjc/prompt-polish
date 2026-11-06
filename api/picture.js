@@ -14,38 +14,32 @@ export default async function handler(req, res) {
 
     try {
         const prompt = `
-            Analyze the image and identify its main conversation topic.
-            
-            Generate 3–5 short, natural, easy-to-say sentences that a person could use in everyday conversation about that topic.
-            
+        Analyze the image and identify its main communication topic.
+
+            Generate 3–5 short, simple, natural sentences that a person with aphasia could use in everyday conversation about that topic.
+
+            Prioritize FUNCTIONAL COMMUNICATION over describing the image.
+
             Rules:
-            - Write from the speaker's perspective when appropriate ("I", "me", "my", "we").
-            - Treat the image as a TOPIC, not as a specific situation involving the speaker.
-            - Generate GENERAL, REUSABLE phrases rather than image-specific statements.
-            - Include a mix of useful conversational intents: preferences, opinions, requests, questions, habits, and related experiences.
-            - Do not assume the speaker owns, wants, needs, likes, dislikes, uses, purchased, or plans to purchase anything in the image.
-            - Do not invent personal circumstances, emotions, memories, relationships, plans, or intentions.
-            - Avoid sentences that depend on details that cannot be known from the image.
-            - Questions are encouraged when they would be useful in conversation.
-            - Keep sentences short, natural, concrete, and easy to understand.
-            - Never describe the image itself (e.g. "There is a...", "The picture shows...", "They are...").
-            - Return only the sentences, one per line. No numbering or explanations.
-            
+        - Keep sentences very short, concrete, and easy to say.
+        - Use common, everyday words and simple grammar.
+        - Focus on useful communication: requests, wants, needs, choices, preferences, questions, comments, and refusals.
+        - Prefer phrases such as "I want...", "Can I have...?", "Can you...?", "Do you...?", "Where is...?", "What is...?", "I like...", and "I don't want...".
+        - Generate phrases the person could choose to say; do not assume these are true about the person.
+        - Do not invent personal circumstances, memories, emotions, plans, or relationships.
+        - Do not describe the image itself.
+        - Do not mention the picture, photo, or visual details.
+        - Avoid long, abstract, or situation-specific sentences.
+
             Example:
-            For headphones, prefer:
-            "I like listening to music using headphones."
-            "Do you have any headphones?"
-            "Have you seen my headphones?"
-            "I use headphones when I listen to music."
-            
-            Avoid:
-            "I need new headphones for work."
-            "I might buy these tomorrow."
-            "I hope these help me focus."
-            
-            The first group is general and reusable; the second group incorrectly assumes the speaker's situation.
-            
-            Generate the most useful general-purpose conversational phrases for the topic.
+        For a coffee cup:
+            Can I have some coffee?
+            Can I have some tea?
+            I want some coffee.
+            Do you want coffee?
+            I like coffee.
+
+            Return only the sentences, one per line. No numbering or explanations.
             `;
 
         const completion = await openai.chat.completions.create({
